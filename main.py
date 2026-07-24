@@ -1,6 +1,6 @@
 import json
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -9,12 +9,15 @@ CORS(app)
 COMMAND_FILE = "commands.json"
 
 
+def verify_key():
+    key = request.headers.get("Authorization")
+    if key != os.getenv("API_KEY"):
+        abort(401)
+
+
 @app.route("/")
 def home():
-    return {
-        "status": "online",
-        "service": "Pleed API"
-    }
+    return {"status": "online", "service": "Pleed API"}
 
 
 @app.route("/commands")
@@ -37,6 +40,8 @@ def command_details(name):
 
 @app.route("/update-commands", methods=["POST"])
 def update_commands():
+    verify_key()
+
     data = request.get_json()
 
     if not data:
@@ -45,10 +50,7 @@ def update_commands():
     with open(COMMAND_FILE, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=2, ensure_ascii=False)
 
-    return {
-        "success": True,
-        "commands": len(data)
-    }
+    return {"success": True, "commands": len(data)}
 
 
 @app.route("/stats")
@@ -56,11 +58,7 @@ def stats():
     with open(COMMAND_FILE, encoding="utf-8") as file:
         commands = json.load(file)
 
-    return jsonify({
-        "servers": 0,
-        "users": 0,
-        "commands": len(commands)
-    })
+    return jsonify({"servers": 0, "users": 0, "commands": len(commands)})
 
 
 if __name__ == "__main__":
