@@ -8,6 +8,7 @@ CORS(app)
 
 COMMAND_FILE = "commands.json"
 SHOWCASE_FILE = "showcase.json"
+STATS_FILE = "stats.json"
 
 
 def verify_key():
@@ -54,30 +55,34 @@ def update_commands():
     return {"success": True, "commands": len(data)}
 
 
+@app.route("/update-stats", methods=["POST"])
+def update_stats():
+    # If using API key protection, uncomment the next line:
+    # verify_key()
+
+    data = request.get_json()
+
+    if not data:
+        return {"error": "No stats provided"}, 400
+
+    with open(STATS_FILE, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=2, ensure_ascii=False)
+
+    return {"success": True}
+
+
 @app.route("/stats")
 def stats():
-    try:
-        with open(SHOWCASE_FILE, encoding="utf-8") as file:
-            data = json.load(file)
+    if not os.path.exists(STATS_FILE):
+        return {
+            "servers": 0,
+            "users": 0,
+            "commands": 0,
+            "uptime": "unknown",
+        }
 
-        return jsonify({
-            "servers": data.get("totalServers", 0),
-            "users": data.get("totalMembers", 0),
-            "commands": data.get("totalCommands", 0),
-            "uptime": data.get("uptime", "99.9%"),
-        })
-
-    except Exception as e:
-        return (
-            jsonify({
-                "servers": 0,
-                "users": 0,
-                "commands": 0,
-                "uptime": "unknown",
-                "error": str(e),
-            }),
-            500,
-        )
+    with open(STATS_FILE, encoding="utf-8") as file:
+        return jsonify(json.load(file))
 
 
 if __name__ == "__main__":
