@@ -9,6 +9,7 @@ CORS(app)
 COMMAND_FILE = "commands.json"
 SHOWCASE_FILE = "showcase.json"
 STATS_FILE = "stats.json"
+SERVER_FILE = "showcase.json"
 
 
 def verify_key():
