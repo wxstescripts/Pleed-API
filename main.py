@@ -4,7 +4,6 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
-
 CORS(app)
 
 COMMAND_FILE = "commands.json"
@@ -22,6 +21,18 @@ def home():
 def commands():
     with open(COMMAND_FILE, encoding="utf-8") as file:
         return jsonify(json.load(file))
+
+
+@app.route("/commands/<name>")
+def command_details(name):
+    with open(COMMAND_FILE, encoding="utf-8") as file:
+        commands = json.load(file)
+
+    for command in commands:
+        if command["name"].lower() == name.lower():
+            return jsonify(command)
+
+    return {"error": "Command not found"}, 404
 
 
 @app.route("/update-commands", methods=["POST"])
