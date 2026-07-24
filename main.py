@@ -51,6 +51,18 @@ def update_commands():
     }
 
 
+@app.route("/stats")
+def stats():
+    with open(COMMAND_FILE, encoding="utf-8") as file:
+        commands = json.load(file)
+
+    return jsonify({
+        "servers": 0,
+        "users": 0,
+        "commands": len(commands)
+    })
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
