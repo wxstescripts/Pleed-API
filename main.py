@@ -85,14 +85,32 @@ def stats():
         return jsonify(json.load(file))
 
 
+@app.route("/update-servers", methods=["POST"])
+def update_servers():
+    data = request.get_json()
+
+    if not data:
+        return {"error": "No data provided"}, 400
+
+    with open(SERVER_FILE, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=2, ensure_ascii=False)
+
+    servers_list = data.get("servers", []) if isinstance(data, dict) else []
+
+    return {
+        "success": True,
+        "servers": len(servers_list)
+    }
+
+
 @app.route("/servers")
 def servers():
+    if not os.path.exists(SERVER_FILE):
+        return jsonify({"servers": []})
+
     try:
-        with open(SHOWCASE_FILE, encoding="utf-8") as file:
-            data = json.load(file)
-
-        return jsonify(data)
-
+        with open(SERVER_FILE, encoding="utf-8") as file:
+            return jsonify(json.load(file))
     except Exception as e:
         return jsonify({"error": str(e), "servers": []}), 500
 
