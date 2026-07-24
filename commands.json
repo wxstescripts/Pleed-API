@@ -1,0 +1,12 @@
+[
+    {
+        "name": "warn",
+        "type": "slash",
+        "description": "Warn a user",
+        "usage": "/warn <user> <reason>",
+        "category": "moderation",
+        "permissions": [
+            "Manage Messages"
+        ]
+    }
+]
