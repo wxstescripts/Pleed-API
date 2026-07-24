@@ -7,6 +7,7 @@ app = Flask(__name__)
 CORS(app)
 
 COMMAND_FILE = "commands.json"
+SHOWCASE_FILE = "showcase.json"
 
 
 def verify_key():
@@ -55,10 +56,28 @@ def update_commands():
 
 @app.route("/stats")
 def stats():
-    with open(COMMAND_FILE, encoding="utf-8") as file:
-        commands = json.load(file)
+    try:
+        with open(SHOWCASE_FILE, encoding="utf-8") as file:
+            data = json.load(file)
 
-    return jsonify({"servers": 0, "users": 0, "commands": len(commands)})
+        return jsonify({
+            "servers": data.get("totalServers", 0),
+            "users": data.get("totalMembers", 0),
+            "commands": data.get("totalCommands", 0),
+            "uptime": data.get("uptime", "99.9%"),
+        })
+
+    except Exception as e:
+        return (
+            jsonify({
+                "servers": 0,
+                "users": 0,
+                "commands": 0,
+                "uptime": "unknown",
+                "error": str(e),
+            }),
+            500,
+        )
 
 
 if __name__ == "__main__":
